@@ -1,4 +1,5 @@
 #include <stdio.h>
+#define MAX 100
 
 // RecordType
 struct RecordType
@@ -11,14 +12,21 @@ struct RecordType
 // Fill out this structure
 struct HashType
 {
-    struct RecordType** hashArray;
-    int size
+    struct Node** hashArray;
+    int size;
 };
+
+typedef struct Node{
+    struct RecordType *dataPtr;
+    struct Node *next;
+}node;
 
 // Compute the hash function
 int hash(int x)
 {
-    x = x % size;
+    x = x % MAX;
+
+    return x;
 }
 
 // parses input file to an integer array
@@ -80,9 +88,13 @@ void displayRecordsInHash(struct HashType *pHashArray, int hashSz)
 
 	for (i=0;i<hashSz;++i)
 	{
-		// if index is occupied with any records, print all
+		if(pHashArray->hashArray[i] != NULL){
+            printf("%d %c %d", pHashArray->hashArray[i]->dataPtr->id, pHashArray->hashArray[i]->dataPtr->name, pHashArray->hashArray[i]->dataPtr->order);
+        }
 	}
 }
+
+void insert(struct HashType *hashTable, struct RecordType* pRecords);
 
 int main(void)
 {
@@ -94,10 +106,32 @@ int main(void)
 	// Your hash implementation
     struct HashType* hashTable = (struct HashType*)malloc(1* sizeof(struct HashType));
     hashTable->size = recordSz;
-    hashTable->hashArray = malloc();
+    hashTable->hashArray = (node**)malloc(MAX* sizeof(node*));
+    for(int i = 0; i < recordSz; i++){
+        insert(hashTable, &pRecords[i]);
+    }
+    displayRecordsInHash(hashTable, MAX);
+
     // Do I need to make an array structure for the hash array or is pRecords sufficient
 }
 
-void insert(struct HashType hashTable, int recordSz){
+void insert(struct HashType *hashTable, struct RecordType* pRecords){
+    if(pRecords == NULL){
+        printf("the data is NULL");
+        return;
+    }
+
+    node* newNode = (node*)malloc(sizeof(node));
+    newNode->dataPtr = pRecords;
+
+   int hashIndex = hash(pRecords->id);
+
+    if(hashTable->hashArray[hashIndex] == NULL){
+        hashTable->hashArray[hashIndex] = newNode;
+    }
+    else{
+        newNode->next = hashTable->hashArray[hashIndex];
+        hashTable->hashArray[hashIndex] = newNode;
+    }
 
 }
